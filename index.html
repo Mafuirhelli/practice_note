@@ -14,16 +14,55 @@
         <h2>Первый столбец</h2>
         <card v-for="card in columns[0].cards" :key="card.id" :card="card" @update="updateCard"></card>
         <button @click="openForm(1)" :disabled="columns[0].cards.length >= 3">Добавить карточку</button>
+        <form v-if="formColumnId === 1" @submit.prevent="submitForm">
+            <h3>Создать карточку</h3>
+            <input type="text" v-model="newCardTitle" placeholder="Заголовок карточки" />
+            <div v-for="(item, index) in newCardItems" :key="index" class="form-item">
+                <input type="text" v-model="newCardItems[index]" placeholder="Пункт списка" />
+                <button @click="removeItem(index)" v-if="newCardItems.length > 3">-</button>
+            </div>
+            <button @click="addItem" v-if="newCardItems.length < 5">+</button>
+            <div class="form-buttons">
+                <button @click="submitForm">Сохранить</button>
+                <button @click="closeForm">Отмена</button>
+            </div>
+        </form>
     </div>
     <div class="column">
         <h2>Второй столбец</h2>
         <card v-for="card in columns[1].cards" :key="card.id" :card="card" @update="updateCard"></card>
         <button @click="openForm(2)" :disabled="columns[1].cards.length >= 5">Добавить карточку</button>
+        <form v-if="formColumnId === 2" @submit.prevent="submitForm">
+            <h3>Создать карточку</h3>
+            <input type="text" v-model="newCardTitle" placeholder="Заголовок карточки" />
+            <div v-for="(item, index) in newCardItems" :key="index" class="form-item">
+                <input type="text" v-model="newCardItems[index]" placeholder="Пункт списка" />
+                <button @click="removeItem(index)" v-if="newCardItems.length > 3">-</button>
+            </div>
+            <button @click="addItem" v-if="newCardItems.length < 5">+</button>
+            <div class="form-buttons">
+                <button @click="submitForm">Сохранить</button>
+                <button @click="closeForm">Отмена</button>
+            </div>
+        </form>
     </div>
     <div class="column">
         <h2>Третий столбец</h2>
         <card v-for="card in columns[2].cards" :key="card.id" :card="card" @update="updateCard"></card>
         <button @click="openForm(3)">Добавить карточку</button>
+        <form v-if="formColumnId === 3" @submit.prevent="submitForm">
+            <h3>Создать карточку</h3>
+            <input type="text" v-model="newCardTitle" placeholder="Заголовок карточки" />
+            <div v-for="(item, index) in newCardItems" :key="index" class="form-item">
+                <input type="text" v-model="newCardItems[index]" placeholder="Пункт списка" />
+                <button @click="removeItem(index)" v-if="newCardItems.length > 3">-</button>
+            </div>
+            <button @click="addItem" v-if="newCardItems.length < 5">+</button>
+            <div class="form-buttons">
+                <button @click="submitForm">Сохранить</button>
+                <button @click="closeForm">Отмена</button>
+            </div>
+        </form>
     </div>
 </div>
 </body>

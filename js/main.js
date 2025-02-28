@@ -1,7 +1,7 @@
 Vue.component('card', {
     props: ['card'],
-    template: `
-    <div class="card">
+    template:
+        `<div class="card">
       <h3>{{ card.title }}</h3>
       <ul>
         <li v-for="(item, index) in card.items" :key="index">
@@ -9,8 +9,7 @@ Vue.component('card', {
           <span :class="{ completed: item.completed }">{{ item.text }}</span>
         </li>
       </ul>
-    </div>
-  `
+    </div>`,
 });
 
 new Vue({
@@ -20,9 +19,17 @@ new Vue({
             { id: 1, cards: [] },
             { id: 2, cards: [] },
             { id: 3, cards: [] }
-        ]
+        ],
+        formColumnId: null,
+        newCardTitle: '',
+        newCardItems: ['', '', '']
     },
     methods: {
+        openForm(columnId) {
+            this.formColumnId = columnId;
+            this.newCardTitle = '';
+            this.newCardItems = ['', '', ''];
+        },
         updateCard() {
             this.columns.forEach(column => {
                 column.cards.forEach(card => {
@@ -43,8 +50,29 @@ new Vue({
         saveData() {
             localStorage.setItem('noteAppData', JSON.stringify(this.columns));
         },
-
-
-
+        submitForm() {
+            const column = this.columns.find(col => col.id === this.formColumnId);
+            if (this.newCardTitle && this.newCardItems.every(item => item.trim())) {
+                column.cards.push({
+                    id: Date.now(),
+                    title: this.newCardTitle,
+                    items: this.newCardItems.map(text => ({ text, completed: false })),
+                    completedAt: null
+                });
+                this.saveData();
+                this.closeForm();
+            } else {
+                alert('Заполните все поля!');
+            }
+        },
+        closeForm() {
+            this.formColumnId = null;
+        },
+        addItem() {
+            this.newCardItems.push('');
+        },
+        removeItem(index) {
+            this.newCardItems.splice(index, 1);
+        },
     }
 });
