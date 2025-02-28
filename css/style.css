@@ -1,0 +1,24 @@
+#app {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px;
+    background-color: #e8f0fe;
+    min-height: 600px;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    overflow-y: auto; /* Добавляем прокрутку, если карточек много */
+}
+
+.column h2 {
+    text-align: center;
+    color: #6a1b9a;
+    margin-bottom: 15px;
+}
