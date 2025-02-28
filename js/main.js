@@ -5,11 +5,20 @@ Vue.component('card', {
       <h3>{{ card.title }}</h3>
       <ul>
         <li v-for="(item, index) in card.items" :key="index">
-          <input type="checkbox" v-model="item.completed">
+          <input type="checkbox" :checked="item.completed" @change="handleCheckboxChange(item)"  :disabled="item.completed">
           <span :class="{ completed: item.completed }">{{ item.text }}</span>
         </li>
       </ul>
+      <p v-if="card.completedAt">Завершено: {{ card.completedAt }}</p>
     </div>`,
+    methods: {
+        handleCheckboxChange(item) {
+            if (!item.completed) {
+                this.$set(item, 'completed', true); // Устанавливаем только в true
+                this.$emit('update'); // Оповещаем родительский компонент о изменениях
+            }
+        }
+    }
 });
 
 new Vue({
@@ -24,11 +33,41 @@ new Vue({
         newCardTitle: '',
         newCardItems: ['', '', '']
     },
+    created() {
+        const savedData = localStorage.getItem('noteAppData');
+        if (savedData) {
+            this.columns = JSON.parse(savedData);
+        }
+    },
     methods: {
         openForm(columnId) {
             this.formColumnId = columnId;
             this.newCardTitle = '';
             this.newCardItems = ['', '', ''];
+        },
+        closeForm() {
+            this.formColumnId = null;
+        },
+        addItem() {
+            this.newCardItems.push('');
+        },
+        removeItem(index) {
+            this.newCardItems.splice(index, 1);
+        },
+        submitForm() {
+            const column = this.columns.find(col => col.id === this.formColumnId);
+            if (this.newCardTitle && this.newCardItems.every(item => item.trim())) {
+                column.cards.push({
+                    id: Date.now(),
+                    title: this.newCardTitle,
+                    items: this.newCardItems.map(text => ({ text, completed: false })),
+                    completedAt: null
+                });
+                this.saveData();
+                this.closeForm();
+            } else {
+                alert('Заполните все поля!');
+            }
         },
         updateCard() {
             this.columns.forEach(column => {
@@ -47,32 +86,17 @@ new Vue({
             });
             this.saveData();
         },
-        saveData() {
-            localStorage.setItem('noteAppData', JSON.stringify(this.columns));
-        },
-        submitForm() {
-            const column = this.columns.find(col => col.id === this.formColumnId);
-            if (this.newCardTitle && this.newCardItems.every(item => item.trim())) {
-                column.cards.push({
-                    id: Date.now(),
-                    title: this.newCardTitle,
-                    items: this.newCardItems.map(text => ({ text, completed: false })),
-                    completedAt: null
-                });
-                this.saveData();
-                this.closeForm();
-            } else {
-                alert('Заполните все поля!');
+        moveCard(card, fromColumnId, toColumnId) {// Метод для перемещения карточки между столбцами
+            const fromColumn = this.columns.find(col => col.id === fromColumnId);// Находим исходный столбец
+            const toColumn = this.columns.find(col => col.id === toColumnId);// Находим нужный столбец
+            const cardIndex = fromColumn.cards.indexOf(card);// Получаем индекс карточки в исходном столбце
+            if (toColumn.cards.length < (toColumnId === 2 ? 5 : Infinity)) {// Проверяем ограничения на количество карточек
+                toColumn.cards.push(card);// Добавляем карточку в нужный столбец
+                fromColumn.cards.splice(cardIndex, 1);// Удаляем карточку из исходного столбца
             }
         },
-        closeForm() {
-            this.formColumnId = null;
-        },
-        addItem() {
-            this.newCardItems.push('');
-        },
-        removeItem(index) {
-            this.newCardItems.splice(index, 1);
+        saveData() {
+            localStorage.setItem('noteAppData', JSON.stringify(this.columns));
         },
         isColumnBlocked(columnId) {
             if (columnId === 1) {
