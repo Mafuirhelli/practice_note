@@ -74,5 +74,16 @@ new Vue({
         removeItem(index) {
             this.newCardItems.splice(index, 1);
         },
+        isColumnBlocked(columnId) {
+            if (columnId === 1) {
+                const secondColumnFull = this.columns[1].cards.length >= 5;
+                const firstColumnOver50 = this.columns[0].cards.some(card => {
+                    const completedCount = card.items.filter(item => item.completed).length;
+                    return (completedCount / card.items.length) * 100 > 50;
+                });
+                return secondColumnFull && firstColumnOver50;
+            }
+            return false;
+        },
     }
 });

@@ -38,3 +38,6 @@ button {
 button:hover {
     background-color: palevioletred;
 }
+button:disabled {
+    background-color: slategrey;
+}
