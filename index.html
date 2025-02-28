@@ -12,15 +12,18 @@
 <div id="app">
     <div class="column">
         <h2>Первый столбец</h2>
-        <button>Добавить карточку</button>
+        <card v-for="card in columns[0].cards" :key="card.id" :card="card" @update="updateCard"></card>
+        <button @click="openForm(1)" :disabled="columns[0].cards.length >= 3">Добавить карточку</button>
     </div>
     <div class="column">
         <h2>Второй столбец</h2>
-        <button>Добавить карточку</button>
+        <card v-for="card in columns[1].cards" :key="card.id" :card="card" @update="updateCard"></card>
+        <button @click="openForm(2)" :disabled="columns[1].cards.length >= 5">Добавить карточку</button>
     </div>
     <div class="column">
         <h2>Третий столбец</h2>
-        <button>Добавить карточку</button>
+        <card v-for="card in columns[2].cards" :key="card.id" :card="card" @update="updateCard"></card>
+        <button @click="openForm(3)">Добавить карточку</button>
     </div>
 </div>
 </body>
