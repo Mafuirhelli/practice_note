@@ -1,16 +1,18 @@
 Vue.component('card', {
     props: ['card'],
-    template:
-        `<div class="card">
-      <h3>{{ card.title }}</h3>
-      <ul>
-        <li v-for="(item, index) in card.items" :key="index">
-          <input type="checkbox" :checked="item.completed" @change="handleCheckboxChange(item)"  :disabled="item.completed">
-          <span :class="{ completed: item.completed }">{{ item.text }}</span>
-        </li>
-      </ul>
-      <p v-if="card.completedAt">Завершено: {{ card.completedAt }}</p>
-    </div>`,
+    template: `
+        <div class="card">
+            <h3>{{ card.title }}</h3>
+            <ul>
+                <li v-for="(item, index) in card.items" :key="index">
+                    <input type="checkbox" :checked="item.completed" @change="handleCheckboxChange(item)"  :disabled="item.completed">
+                    <span :class="{ completed: item.completed }">{{ item.text }}</span>
+                </li>
+            </ul>
+            <p v-if="card.completedAt">Завершено: {{ card.completedAt }}</p>
+            <button @click="$emit('delete', card.id)">Удалить</button> <!-- Кнопка для удаления карточки -->
+        </div>
+    `,
     methods: {
         handleCheckboxChange(item) {
             if (!item.completed) {
@@ -31,7 +33,8 @@ new Vue({
         ],
         formColumnId: null,
         newCardTitle: '',
-        newCardItems: ['', '', '']
+        newCardItems: ['', '', ''],
+        searchQuery: '' // Добавлено поле для поиска карточек
     },
     created() {
         const savedData = localStorage.getItem('noteAppData');
@@ -86,13 +89,13 @@ new Vue({
             });
             this.saveData();
         },
-        moveCard(card, fromColumnId, toColumnId) {// Метод для перемещения карточки между столбцами
-            const fromColumn = this.columns.find(col => col.id === fromColumnId);// Находим исходный столбец
-            const toColumn = this.columns.find(col => col.id === toColumnId);// Находим нужный столбец
-            const cardIndex = fromColumn.cards.indexOf(card);// Получаем индекс карточки в исходном столбце
-            if (toColumn.cards.length < (toColumnId === 2 ? 5 : Infinity)) {// Проверяем ограничения на количество карточек
-                toColumn.cards.push(card);// Добавляем карточку в нужный столбец
-                fromColumn.cards.splice(cardIndex, 1);// Удаляем карточку из исходного столбца
+        moveCard(card, fromColumnId, toColumnId) {
+            const fromColumn = this.columns.find(col => col.id === fromColumnId);
+            const toColumn = this.columns.find(col => col.id === toColumnId);
+            const cardIndex = fromColumn.cards.indexOf(card);
+            if (toColumn.cards.length < (toColumnId === 2 ? 5 : Infinity)) {
+                toColumn.cards.push(card);
+                fromColumn.cards.splice(cardIndex, 1);
             }
         },
         saveData() {
@@ -108,6 +111,20 @@ new Vue({
                 return secondColumnFull && firstColumnOver50;
             }
             return false;
+        },
+        filteredCards(cards) { // Метод для фильтрации карточек по заголовкам
+            if (!this.searchQuery) return cards; // Если нет запроса на поиск, возвращаем все карточки
+            const query = this.searchQuery.toLowerCase();
+            return cards.filter(card => card.title.toLowerCase().includes(query)); // Фильтруем карточки
+        },
+        deleteCard(cardId) { // Метод для удаления карточек
+            this.columns.forEach(column => {
+                const cardIndex = column.cards.findIndex(card => card.id === cardId);
+                if (cardIndex !== -1) {
+                    column.cards.splice(cardIndex, 1); // Удаляем карточку
+                }
+            });
+            this.saveData(); // Сохраняем изменения
         },
     }
 });

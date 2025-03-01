@@ -41,3 +41,22 @@ button:hover {
 button:disabled {
     background-color: slategrey;
 }
+
+
+.search-input {
+    padding: 10px;
+    border: 1px;
+    border-radius: 30px;
+    width: 100%;
+    max-width: 400px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.search-input:focus {
+    border-color: #66afe9;
+    outline: none;
+}
