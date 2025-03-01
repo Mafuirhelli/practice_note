@@ -7,7 +7,7 @@ body{
     align-items: flex-start;
     padding: 20px;
     background-color: lightblue;
-    min-height: 600px;
+    min-height: 95.25vh;
 }
 
 .column {
