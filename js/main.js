@@ -5,20 +5,23 @@ Vue.component('card', {
             <h3>{{ card.title }}</h3>
             <ul>
                 <li v-for="(item, index) in card.items" :key="index">
-                    <input type="checkbox" :checked="item.completed" @change="handleCheckboxChange(item)"  :disabled="item.completed">
+                    <input type="checkbox" :checked="item.completed" @change="handleCheckboxChange(item)" :disabled="item.completed">
                     <span :class="{ completed: item.completed }">{{ item.text }}</span>
                 </li>
             </ul>
             <p v-if="card.completedAt">Завершено: {{ card.completedAt }}</p>
-            <button @click="$emit('delete', card.id)">Удалить</button> <!-- Кнопка для удаления карточки -->
+            <button @click="moveCardToDeleted">Удалить</button>
         </div>
     `,
     methods: {
         handleCheckboxChange(item) {
             if (!item.completed) {
-                this.$set(item, 'completed', true); // Устанавливаем только в true
-                this.$emit('update'); // Оповещаем родительский компонент о изменениях
+                this.$set(item, 'completed', true);
+                this.$emit('update');
             }
+        },
+        moveCardToDeleted() {
+            this.$emit('move-card', this.card);
         }
     }
 });
@@ -29,17 +32,20 @@ new Vue({
         columns: [
             { id: 1, cards: [] },
             { id: 2, cards: [] },
-            { id: 3, cards: [] }
+            { id: 3, cards: [] },
         ],
         formColumnId: null,
         newCardTitle: '',
         newCardItems: ['', '', ''],
-        searchQuery: '' // Добавлено поле для поиска карточек
+        searchQuery: '',
+        deletedCards: []
     },
     created() {
         const savedData = localStorage.getItem('noteAppData');
         if (savedData) {
-            this.columns = JSON.parse(savedData);
+            const parsedData = JSON.parse(savedData);
+            this.columns = parsedData.columns || this.columns;
+            this.deletedCards = parsedData.deletedCards || this.deletedCards;
         }
     },
     methods: {
@@ -78,10 +84,10 @@ new Vue({
                     const completedCount = card.items.filter(item => item.completed).length;
                     const totalItems = card.items.length;
                     const completionPercentage = (completedCount / totalItems) * 100;
+
                     if (completionPercentage > 50 && column.id === 1) {
                         this.moveCard(card, 1, 2);
-                    }
-                    if (completionPercentage === 100) {
+                    } else if (completionPercentage === 100 && column.id !== 3) {
                         card.completedAt = new Date().toLocaleString();
                         this.moveCard(card, column.id, 3);
                     }
@@ -99,7 +105,11 @@ new Vue({
             }
         },
         saveData() {
-            localStorage.setItem('noteAppData', JSON.stringify(this.columns));
+            const dataToSave = {
+                columns: this.columns,
+                deletedCards: this.deletedCards
+            };
+            localStorage.setItem('noteAppData', JSON.stringify(dataToSave));
         },
         isColumnBlocked(columnId) {
             if (columnId === 1) {
@@ -112,19 +122,17 @@ new Vue({
             }
             return false;
         },
-        filteredCards(cards) { // Метод для фильтрации карточек по заголовкам
-            if (!this.searchQuery) return cards; // Если нет запроса на поиск, возвращаем все карточки
+        filteredCards(cards) {
+            if (!this.searchQuery) return cards;
             const query = this.searchQuery.toLowerCase();
-            return cards.filter(card => card.title.toLowerCase().includes(query)); // Фильтруем карточки
+            return cards.filter(card => card.title.toLowerCase().includes(query));
         },
-        deleteCard(cardId) { // Метод для удаления карточек
-            this.columns.forEach(column => {
-                const cardIndex = column.cards.findIndex(card => card.id === cardId);
-                if (cardIndex !== -1) {
-                    column.cards.splice(cardIndex, 1); // Удаляем карточку
-                }
-            });
-            this.saveData(); // Сохраняем изменения
-        },
+        moveCardToDeleted(card) {
+            card.deletedAt = new Date().toLocaleString();
+            this.deletedCards.push(card);
+            const column = this.columns.find(col => col.cards.includes(card));
+            column.cards.splice(column.cards.indexOf(card), 1);
+            this.saveData();
+        }
     }
 });

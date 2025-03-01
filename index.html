@@ -10,12 +10,12 @@
 </head>
 <body>
 <div id="app">
-        <input type="text" class="search-input" v-model="searchQuery" placeholder="Поиск карточек...">
+    <input type="text" class="search-input" v-model="searchQuery" placeholder="Поиск карточек...">
 
     <div class="column" :class="{ blocked: isColumnBlocked(1) }">
         <h2>Первый столбец</h2>
-        <card v-for="card in filteredCards(columns[0].cards)" :key="card.id" :card="card" @update="updateCard" @delete="deleteCard"></card>
-        <button @click="openForm(1)" :disabled="columns[0].cards.length >= 3">Добавить карточку</button>
+        <card v-for="card in filteredCards(columns[0].cards)" :key="card.id" :card="card" @update="updateCard" @move-card="moveCardToDeleted"></card>
+        <button @click="openForm(1)" :disabled="columns[0].cards.length >= 3 || isColumnBlocked(1)">Добавить карточку</button>
         <form v-if="formColumnId === 1" @submit.prevent="submitForm">
             <h3>Создать карточку</h3>
             <input type="text" v-model="newCardTitle" placeholder="Заголовок карточки" />
@@ -32,7 +32,7 @@
     </div>
     <div class="column">
         <h2>Второй столбец</h2>
-        <card v-for="card in filteredCards(columns[1].cards)" :key="card.id" :card="card" @update="updateCard" @delete="deleteCard"></card>
+        <card v-for="card in filteredCards(columns[1].cards)" :key="card.id" :card="card" @update="updateCard" @move-card="moveCardToDeleted"></card>
         <button @click="openForm(2)" :disabled="columns[1].cards.length >= 5">Добавить карточку</button>
         <form v-if="formColumnId === 2" @submit.prevent="submitForm">
             <h3>Создать карточку</h3>
@@ -50,7 +50,13 @@
     </div>
     <div class="column">
         <h2>Третий столбец</h2>
-        <card v-for="card in filteredCards(columns[2].cards)" :key="card.id" :card="card" @update="updateCard" @delete="deleteCard"></card>
+        <card v-for="card in filteredCards(columns[2].cards)" :key="card.id" :card="card" @update="updateCard" @move-card="moveCardToDeleted"></card>
+    </div>
+    <div class="column">
+        <h2>Удаленные карточки</h2>
+        <div v-for="(deletedCard, index) in deletedCards" :key="index">
+            <p>{{ deletedCard.title }} - Удалено в {{ deletedCard.deletedAt }}</p>
+        </div>
     </div>
 </div>
 </body>
