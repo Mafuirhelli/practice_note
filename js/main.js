@@ -1,11 +1,11 @@
 Vue.component('card', {
-    props: ['card'],
+    props: ['card', 'isBlocked'],
     template: `
         <div class="card">
             <h3>{{ card.title }}</h3>
             <ul>
                 <li v-for="(item, index) in card.items" :key="index">
-                    <input type="checkbox" :checked="item.completed" @change="handleCheckboxChange(item)" :disabled="item.completed">
+                    <input type="checkbox" :checked="item.completed" @change="handleCheckboxChange(item)" :disabled="item.completed || isBlocked">
                     <span :class="{ completed: item.completed }">{{ item.text }}</span>
                 </li>
             </ul>
